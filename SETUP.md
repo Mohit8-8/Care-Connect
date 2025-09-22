@@ -51,6 +51,8 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
 # Vonage Video API - REQUIRED for video calls
 NEXT_PUBLIC_VONAGE_APPLICATION_ID=your_vonage_app_id
 VONAGE_PRIVATE_KEY=lib/private.key
+
+# Note: Credit purchase feature is currently in demo mode - no Stripe setup required
 ```
 
 ### 2. Database Setup
@@ -112,7 +114,26 @@ npx prisma studio
    - Download private key to `lib/private.key`
    - Copy Application ID to `.env.local`
 
-### 7. Start Development Server
+### 7. Credit Purchase Feature (Demo Mode)
+
+The credit purchase feature is now available in **demo mode** - no payment gateway setup required!
+
+**How it works:**
+- Navigate to `/pricing` page
+- Click "Book Consultation" on any plan
+- Fill out the demo payment form
+- Credits are automatically added to user accounts (no real payment processed)
+
+**Demo Mode Features:**
+- ✅ Functional payment form UI
+- ✅ Credit allocation simulation
+- ✅ Success/error handling
+- ✅ No Stripe configuration needed
+- ✅ Perfect for testing the user experience
+
+**Note:** This is currently in demo mode for testing purposes. When ready for production, the Stripe integration can be enabled by updating the modal component and adding the required environment variables.
+
+### 8. Start Development Server
 
 ```bash
 npm run dev
