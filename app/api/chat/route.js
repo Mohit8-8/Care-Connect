@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY || 'REMOVED';
+const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 
 // Simple in-memory cache for API responses
 const responseCache = new Map();
@@ -21,6 +21,13 @@ setInterval(cleanExpiredCache, 5 * 60 * 1000);
 
 export async function POST(request) {
   try {
+    // Check if API key is available
+    if (!PERPLEXITY_API_KEY) {
+      return NextResponse.json({
+        error: 'AI service is not configured. Please contact support.'
+      }, { status: 503 });
+    }
+
     const { message, conversationHistory = [], sessionId, userLanguage = 'en' } = await request.json();
 
     if (!message) {
