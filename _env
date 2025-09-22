@@ -1,0 +1,17 @@
+# Prisma
+# Connection string for your database (e.g., PostgreSQL)
+DATABASE_URL='postgresql://Priyanshu%20Verma:npg_9O7ydwnEQlNR@ep-fancy-salad-adip6dsz-pooler.c-2.us-east-1.aws.neon.tech/Care-Connect?sslmode=require&channel_binding=require'
+
+# Clerk Authentication
+# Get these from your Clerk dashboard
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_cHJlc2VudC1nZWxkaW5nLTM1LmNsZXJrLmFjY291bnRzLmRldiQ
+CLERK_SECRET_KEY=sk_test_PkcJPq6CJE1JDPLDoFAQ400aOVCfAJbgXeMnGMYUDP
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/onboarding
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
+
+# Vonage Video API
+# Get these from your Vonage dashboard for video call functionality
+NEXT_PUBLIC_VONAGE_APPLICATION_ID=1c3bb269-7e83-4ac5-9446-1365bfe21897
+VONAGE_PRIVATE_KEY=lib/private.key

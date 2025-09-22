@@ -261,3 +261,118 @@ export async function approvePayout(formData) {
     throw new Error(`Failed to approve payout: ${error.message}`);
   }
 }
+
+/**
+ * Gets all medicine stores with pending verification
+ */
+export async function getPendingMedicineStores() {
+  const isAdmin = await verifyAdmin();
+  if (!isAdmin) throw new Error("Unauthorized");
+
+  try {
+    const pendingStores = await db.user.findMany({
+      where: {
+        role: "MEDICINE_STORE",
+        storeVerificationStatus: "PENDING",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return { stores: pendingStores };
+  } catch (error) {
+    throw new Error("Failed to fetch pending medicine stores");
+  }
+}
+
+/**
+ * Gets all verified medicine stores
+ */
+export async function getVerifiedMedicineStores() {
+  const isAdmin = await verifyAdmin();
+  if (!isAdmin) throw new Error("Unauthorized");
+
+  try {
+    const verifiedStores = await db.user.findMany({
+      where: {
+        role: "MEDICINE_STORE",
+        storeVerificationStatus: "VERIFIED",
+      },
+      orderBy: {
+        storeName: "asc",
+      },
+    });
+
+    return { stores: verifiedStores };
+  } catch (error) {
+    console.error("Failed to get verified medicine stores:", error);
+    return { error: "Failed to fetch verified medicine stores" };
+  }
+}
+
+/**
+ * Updates a medicine store's verification status
+ */
+export async function updateMedicineStoreStatus(formData) {
+  const isAdmin = await verifyAdmin();
+  if (!isAdmin) throw new Error("Unauthorized");
+
+  const storeId = formData.get("storeId");
+  const status = formData.get("status");
+
+  if (!storeId || !["VERIFIED", "REJECTED"].includes(status)) {
+    throw new Error("Invalid input");
+  }
+
+  try {
+    await db.user.update({
+      where: {
+        id: storeId,
+      },
+      data: {
+        storeVerificationStatus: status,
+      },
+    });
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update medicine store status:", error);
+    throw new Error(`Failed to update medicine store status: ${error.message}`);
+  }
+}
+
+/**
+ * Suspends or reinstates a medicine store
+ */
+export async function updateMedicineStoreActiveStatus(formData) {
+  const isAdmin = await verifyAdmin();
+  if (!isAdmin) throw new Error("Unauthorized");
+
+  const storeId = formData.get("storeId");
+  const suspend = formData.get("suspend") === "true";
+
+  if (!storeId) {
+    throw new Error("Store ID is required");
+  }
+
+  try {
+    const status = suspend ? "PENDING" : "VERIFIED";
+
+    await db.user.update({
+      where: {
+        id: storeId,
+      },
+      data: {
+        storeVerificationStatus: status,
+      },
+    });
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update medicine store active status:", error);
+    throw new Error(`Failed to update medicine store status: ${error.message}`);
+  }
+}
