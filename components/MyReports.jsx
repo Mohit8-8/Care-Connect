@@ -40,8 +40,33 @@ export default function MyReports() {
     }
   };
 
-  const handleDownload = (report) => {
-    window.open(report.fileUrl, "_blank");
+  const handleDownload = async (report) => {
+    try {
+      // Fetch the file
+      const response = await fetch(report.fileUrl);
+      const blob = await response.blob();
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Set filename from report title or use default
+      const filename = report.title ? `${report.title}.${report.fileType.split('/')[1]}` : 'report';
+      link.download = filename;
+
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback to opening in new tab if download fails
+      window.open(report.fileUrl, "_blank");
+    }
   };
 
   const getFileIcon = (fileType) => {
