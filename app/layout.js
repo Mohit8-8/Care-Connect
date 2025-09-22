@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import Header from "@/components/header";
 import { dark } from "@clerk/themes";
 import { ThemeProvider } from "@/components/theme-provider";
+import FloatingChatButton from "@/components/FloatingChatButtonImproved";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -40,6 +41,8 @@ export default function RootLayout({ children }) {
                 <p>Made with 💗 by RoadsideCoder</p>
               </div>
             </footer>
+
+            <FloatingChatButton />
           </ThemeProvider>
         </body>
       </html>

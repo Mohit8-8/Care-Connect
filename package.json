@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "troubleshoot": "node troubleshoot.js",
+    "db:ping": "npx prisma db ping",
+    "db:studio": "npx prisma studio",
+    "db:migrate": "npx prisma migrate dev",
+    "db:reset": "npx prisma migrate reset --force"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.19.3",

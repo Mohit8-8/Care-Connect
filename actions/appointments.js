@@ -298,7 +298,7 @@ export async function getAvailableTimeSlots(doctorId) {
       throw new Error("Doctor not found or not verified");
     }
 
-    // Fetch a single availability record
+    // Fetch availability records
     const availability = await db.availability.findFirst({
       where: {
         doctorId: doctor.id,
@@ -306,8 +306,13 @@ export async function getAvailableTimeSlots(doctorId) {
       },
     });
 
+    // If no availability is set, return empty slots instead of throwing error
     if (!availability) {
-      throw new Error("No availability set by doctor");
+      console.log(`No availability set for doctor ${doctor.id}`);
+      return {
+        days: [],
+        message: "This doctor hasn't set their availability yet. Please check back later or contact the doctor directly."
+      };
     }
 
     // Get the next 4 days
