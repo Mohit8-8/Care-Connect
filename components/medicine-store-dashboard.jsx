@@ -2,11 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, ShoppingCart, TrendingUp, AlertTriangle, Plus, Eye, UserPlus } from "lucide-react";
+import {
+  Package,
+  ShoppingCart,
+  TrendingUp,
+  AlertTriangle,
+  Plus,
+  Eye,
+  UserPlus,
+} from "lucide-react";
 import { getMedicineStoreStats } from "@/actions/medicine-store";
 import { getStoreInventory } from "@/actions/medicine-inventory";
 import { getStoreOrders } from "@/actions/medicine-orders";
@@ -84,12 +98,14 @@ export default function MedicineStoreDashboard() {
               Complete Your Medicine Store Setup
             </CardTitle>
             <CardDescription className="text-orange-600">
-              You need to complete the onboarding process to access the medicine store dashboard
+              You need to complete the onboarding process to access the medicine
+              store dashboard
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-gray-700">
-              To manage your medicine store inventory and serve patients, please complete your store registration.
+              To manage your medicine store inventory and serve patients, please
+              complete your store registration.
             </p>
             <Button
               onClick={() => router.push("/onboarding")}
@@ -115,11 +131,15 @@ export default function MedicineStoreDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Medicines</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Medicines
+            </CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalMedicines || 0}</div>
+            <div className="text-2xl font-bold">
+              {stats?.totalMedicines || 0}
+            </div>
           </CardContent>
         </Card>
 
@@ -135,11 +155,15 @@ export default function MedicineStoreDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Pending Orders
+            </CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.pendingOrders || 0}</div>
+            <div className="text-2xl font-bold">
+              {stats?.pendingOrders || 0}
+            </div>
           </CardContent>
         </Card>
 
@@ -149,7 +173,9 @@ export default function MedicineStoreDashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats?.totalRevenue?.toFixed(2) || "0.00"}</div>
+            <div className="text-2xl font-bold">
+              ₹{stats?.totalRevenue?.toFixed(2) || "0.00"}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -173,14 +199,21 @@ export default function MedicineStoreDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {inventory.slice(0, 5).map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.medicine.name}</h3>
-                      <p className="text-sm text-gray-600">{item.medicine.category}</p>
-                      <p className="text-sm text-gray-500">Stock: {item.stock}</p>
+                      <p className="text-sm text-gray-600">
+                        {item.medicine.category}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Stock: {item.stock}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">${item.price.toFixed(2)}</p>
+                      <p className="font-semibold">₹{item.price.toFixed(2)}</p>
                       {item.stock <= (item.minStockLevel || 0) && (
                         <Badge variant="destructive" className="mt-1">
                           Low Stock
@@ -191,7 +224,8 @@ export default function MedicineStoreDashboard() {
                 ))}
                 {inventory.length === 0 && (
                   <p className="text-center text-gray-500 py-8">
-                    No medicines in inventory. Add your first medicine to get started.
+                    No medicines in inventory. Add your first medicine to get
+                    started.
                   </p>
                 )}
               </div>
@@ -210,11 +244,15 @@ export default function MedicineStoreDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {orders.slice(0, 5).map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <h3 className="font-semibold">{order.medicine.name}</h3>
                       <p className="text-sm text-gray-600">
-                        Quantity: {order.quantity} | Customer: {order.patient.name}
+                        Quantity: {order.quantity} | Customer:{" "}
+                        {order.patient.name}
                       </p>
                       <p className="text-sm text-gray-500">
                         {new Date(order.orderDate).toLocaleDateString()}
@@ -224,13 +262,16 @@ export default function MedicineStoreDashboard() {
                       <Badge className={getStatusColor(order.status)}>
                         {order.status.replace("_", " ")}
                       </Badge>
-                      <p className="font-semibold">${order.totalAmount.toFixed(2)}</p>
+                      <p className="font-semibold">
+                        ₹{order.totalAmount.toFixed(2)}
+                      </p>
                     </div>
                   </div>
                 ))}
                 {orders.length === 0 && (
                   <p className="text-center text-gray-500 py-8">
-                    No orders yet. Orders will appear here when customers place them.
+                    No orders yet. Orders will appear here when customers place
+                    them.
                   </p>
                 )}
               </div>
@@ -248,15 +289,21 @@ export default function MedicineStoreDashboard() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Pending Orders:</span>
-                    <span className="font-semibold">{stats?.pendingOrders || 0}</span>
+                    <span className="font-semibold">
+                      {stats?.pendingOrders || 0}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Total Orders:</span>
-                    <span className="font-semibold">{stats?.totalOrders || 0}</span>
+                    <span className="font-semibold">
+                      {stats?.totalOrders || 0}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Revenue:</span>
-                    <span className="font-semibold">${stats?.totalRevenue?.toFixed(2) || "0.00"}</span>
+                    <span className="font-semibold">
+                      ₹{stats?.totalRevenue?.toFixed(2) || "0.00"}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -270,11 +317,15 @@ export default function MedicineStoreDashboard() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Low Stock Items:</span>
-                    <span className="font-semibold text-red-600">{stats?.lowStockItems || 0}</span>
+                    <span className="font-semibold text-red-600">
+                      {stats?.lowStockItems || 0}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Total Items:</span>
-                    <span className="font-semibold">{stats?.totalMedicines || 0}</span>
+                    <span className="font-semibold">
+                      {stats?.totalMedicines || 0}
+                    </span>
                   </div>
                 </div>
               </CardContent>

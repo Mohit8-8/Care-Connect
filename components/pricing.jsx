@@ -13,7 +13,7 @@ const Pricing = () => {
   const pricingPlans = [
     {
       name: "Basic Consultation",
-      price: "$29",
+      price: "₹29",
       duration: "30 minutes",
       features: [
         "General health consultation",
@@ -25,7 +25,7 @@ const Pricing = () => {
     },
     {
       name: "Extended Consultation",
-      price: "$49",
+      price: "₹49",
       duration: "45 minutes",
       features: [
         "Comprehensive health assessment",
@@ -39,7 +39,7 @@ const Pricing = () => {
     },
     {
       name: "Specialist Consultation",
-      price: "$79",
+      price: "₹79",
       duration: "60 minutes",
       features: [
         "Specialist doctor consultation",
@@ -81,7 +81,9 @@ const Pricing = () => {
                 <span className="text-3xl font-bold text-emerald-400">
                   {plan.price}
                 </span>
-                <span className="text-muted-foreground ml-1">/{plan.duration}</span>
+                <span className="text-muted-foreground ml-1">
+                  /{plan.duration}
+                </span>
               </div>
             </CardHeader>
 

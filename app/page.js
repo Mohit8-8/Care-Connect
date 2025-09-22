@@ -22,12 +22,14 @@ export default function Home() {
                 Healthcare made simple
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                Connect with doctors <br />
-                <span className="gradient-title">anytime, anywhere</span>
+                Bringing quality healthcare to <br />
+                <span className="gradient-title">rural Punjab</span>
               </h1>
               <p className="text-muted-foreground text-lg md:text-xl max-w-md">
-                Book appointments, consult via video, and manage your healthcare
-                journey all in one secure platform.
+                Consult doctors
+                online, access digital health records, and check local medicine
+                availability. No more long journeys or missed work CareConnect
+                puts essential care in your hands.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button

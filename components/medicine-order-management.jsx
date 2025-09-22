@@ -1,12 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Clock, CheckCircle, XCircle, Truck, MapPin, Phone } from "lucide-react";
+import {
+  Package,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Truck,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import { getPatientOrders } from "@/actions/medicine-orders";
 import { getStoreOrders, updateOrderStatus } from "@/actions/medicine-orders";
 import { cancelMedicineOrder } from "@/actions/medicine-orders";
@@ -99,9 +119,10 @@ export default function MedicineOrderManagement() {
     return icons[status] || Package;
   };
 
-  const filteredOrders = filterStatus === "all"
-    ? orders
-    : orders.filter(order => order.status === filterStatus);
+  const filteredOrders =
+    filterStatus === "all"
+      ? orders
+      : orders.filter((order) => order.status === filterStatus);
 
   if (loading) {
     return (
@@ -152,7 +173,8 @@ export default function MedicineOrderManagement() {
                         {order.medicine.name}
                       </CardTitle>
                       <CardDescription>
-                        Order #{order.id.slice(-8)} • {new Date(order.orderDate).toLocaleDateString()}
+                        Order #{order.id.slice(-8)} •{" "}
+                        {new Date(order.orderDate).toLocaleDateString()}
                       </CardDescription>
                     </div>
                     <Badge className={getStatusColor(order.status)}>
@@ -169,11 +191,15 @@ export default function MedicineOrderManagement() {
                       </div>
                       <div className="flex justify-between">
                         <span>Unit Price:</span>
-                        <span className="font-semibold">${order.unitPrice.toFixed(2)}</span>
+                        <span className="font-semibold">
+                          ₹{order.unitPrice.toFixed(2)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Total Amount:</span>
-                        <span className="font-bold text-lg">${order.totalAmount.toFixed(2)}</span>
+                        <span className="font-bold text-lg">
+                          ₹{order.totalAmount.toFixed(2)}
+                        </span>
                       </div>
                     </div>
 
@@ -195,7 +221,9 @@ export default function MedicineOrderManagement() {
                         </div>
                       ) : (
                         <div>
-                          <h4 className="font-semibold mb-2">Customer Details:</h4>
+                          <h4 className="font-semibold mb-2">
+                            Customer Details:
+                          </h4>
                           <div className="space-y-1 text-sm">
                             <p>{order.patient.name}</p>
                             <p>{order.patient.email}</p>
@@ -222,7 +250,9 @@ export default function MedicineOrderManagement() {
                         {order.status === "PENDING" && (
                           <Button
                             size="sm"
-                            onClick={() => handleStatusUpdate(order.id, "CONFIRMED")}
+                            onClick={() =>
+                              handleStatusUpdate(order.id, "CONFIRMED")
+                            }
                           >
                             Confirm Order
                           </Button>
@@ -230,7 +260,9 @@ export default function MedicineOrderManagement() {
                         {order.status === "CONFIRMED" && (
                           <Button
                             size="sm"
-                            onClick={() => handleStatusUpdate(order.id, "PREPARING")}
+                            onClick={() =>
+                              handleStatusUpdate(order.id, "PREPARING")
+                            }
                           >
                             Start Preparing
                           </Button>
@@ -238,7 +270,9 @@ export default function MedicineOrderManagement() {
                         {order.status === "PREPARING" && (
                           <Button
                             size="sm"
-                            onClick={() => handleStatusUpdate(order.id, "READY_FOR_PICKUP")}
+                            onClick={() =>
+                              handleStatusUpdate(order.id, "READY_FOR_PICKUP")
+                            }
                           >
                             Ready for Pickup
                           </Button>
@@ -246,7 +280,9 @@ export default function MedicineOrderManagement() {
                         {order.status === "READY_FOR_PICKUP" && (
                           <Button
                             size="sm"
-                            onClick={() => handleStatusUpdate(order.id, "DELIVERED")}
+                            onClick={() =>
+                              handleStatusUpdate(order.id, "DELIVERED")
+                            }
                           >
                             Mark Delivered
                           </Button>
@@ -267,8 +303,7 @@ export default function MedicineOrderManagement() {
             <p className="text-gray-500">
               {filterStatus === "all"
                 ? "You haven't placed or received any orders yet."
-                : `No orders with status "${filterStatus}".`
-              }
+                : `No orders with status "${filterStatus}".`}
             </p>
           </CardContent>
         </Card>
