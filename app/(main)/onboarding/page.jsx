@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Stethoscope, Loader2 } from "lucide-react";
+import { User, Stethoscope, Loader2, ShoppingCart } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,13 +23,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { setUserRole } from "@/actions/onboarding";
-import { doctorFormSchema } from "@/lib/schema";
+import { doctorFormSchema, medicineStoreFormSchema } from "@/lib/schema";
 import { SPECIALTIES } from "@/lib/specialities";
 import useFetch from "@/hooks/use-fetch";
 import { useEffect } from "react";
 
 export default function OnboardingPage() {
   const [step, setStep] = useState("choose-role");
+  const [storeFormData, setStoreFormData] = useState({
+    storeName: "",
+    storeAddress: "",
+    storePhone: "",
+    storeLicense: "",
+    storeDescription: "",
+  });
   const router = useRouter();
 
   // Custom hook for user role server action
@@ -85,14 +92,26 @@ export default function OnboardingPage() {
     await submitUserRole(formData);
   };
 
+  // Medicine store form submission
+  const onMedicineStoreSubmit = async () => {
+    if (loading) return;
+
+    const formData = new FormData();
+    formData.append("role", "MEDICINE_STORE");
+    formData.append("storeName", storeFormData.storeName);
+    formData.append("storeAddress", storeFormData.storeAddress);
+    formData.append("storePhone", storeFormData.storePhone);
+    formData.append("storeLicense", storeFormData.storeLicense);
+    formData.append("storeDescription", storeFormData.storeDescription);
+
+    await submitUserRole(formData);
+  };
+
   // Role selection screen
   if (step === "choose-role") {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card
-          className="border-emerald-900/20 hover:border-emerald-700/40 cursor-pointer transition-all"
-          onClick={() => !loading && handlePatientSelection()}
-        >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="border-emerald-900/20 hover:border-emerald-700/40 transition-all">
           <CardContent className="pt-6 pb-6 flex flex-col items-center text-center">
             <div className="p-4 bg-emerald-900/20 rounded-full mb-4">
               <User className="h-8 w-8 text-emerald-400" />
@@ -107,6 +126,7 @@ export default function OnboardingPage() {
             <Button
               className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700"
               disabled={loading}
+              onClick={handlePatientSelection}
             >
               {loading ? (
                 <>
@@ -120,10 +140,7 @@ export default function OnboardingPage() {
           </CardContent>
         </Card>
 
-        <Card
-          className="border-emerald-900/20 hover:border-emerald-700/40 cursor-pointer transition-all"
-          onClick={() => !loading && setStep("doctor-form")}
-        >
+        <Card className="border-emerald-900/20 hover:border-emerald-700/40 transition-all">
           <CardContent className="pt-6 pb-6 flex flex-col items-center text-center">
             <div className="p-4 bg-emerald-900/20 rounded-full mb-4">
               <Stethoscope className="h-8 w-8 text-emerald-400" />
@@ -138,8 +155,31 @@ export default function OnboardingPage() {
             <Button
               className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700"
               disabled={loading}
+              onClick={() => setStep("doctor-form")}
             >
               Continue as Doctor
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="border-emerald-900/20 hover:border-emerald-700/40 transition-all">
+          <CardContent className="pt-6 pb-6 flex flex-col items-center text-center">
+            <div className="p-4 bg-emerald-900/20 rounded-full mb-4">
+              <ShoppingCart className="h-8 w-8 text-emerald-400" />
+            </div>
+            <CardTitle className="text-xl font-semibold text-white mb-2">
+              Join as Medicine Store
+            </CardTitle>
+            <CardDescription className="mb-4">
+              Manage your pharmacy inventory, fulfill orders, and serve patients
+              with their medication needs
+            </CardDescription>
+            <Button
+              className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700"
+              disabled={loading}
+              onClick={() => setStep("medicine-store-form")}
+            >
+              Continue as Medicine Store
             </Button>
           </CardContent>
         </Card>
@@ -265,6 +305,117 @@ export default function OnboardingPage() {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Medicine store registration form
+  if (step === "medicine-store-form") {
+    return (
+      <Card className="border-emerald-900/20">
+        <CardContent className="pt-6">
+          <div className="mb-6">
+            <CardTitle className="text-2xl font-bold text-white mb-2">
+              Complete Your Medicine Store Profile
+            </CardTitle>
+            <CardDescription>
+              Please provide your store details for verification
+            </CardDescription>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="storeName">Store Name</Label>
+              <Input
+                id="storeName"
+                type="text"
+                placeholder="Enter your store name"
+                value={storeFormData.storeName}
+                onChange={(e) =>
+                  setStoreFormData({ ...storeFormData, storeName: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="storeAddress">Store Address</Label>
+              <Textarea
+                id="storeAddress"
+                placeholder="Enter your complete store address"
+                rows="3"
+                value={storeFormData.storeAddress}
+                onChange={(e) =>
+                  setStoreFormData({ ...storeFormData, storeAddress: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="storePhone">Phone Number</Label>
+              <Input
+                id="storePhone"
+                type="tel"
+                placeholder="Enter your store phone number"
+                value={storeFormData.storePhone}
+                onChange={(e) =>
+                  setStoreFormData({ ...storeFormData, storePhone: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="storeLicense">Store License Number</Label>
+              <Input
+                id="storeLicense"
+                type="text"
+                placeholder="Enter your pharmacy license number"
+                value={storeFormData.storeLicense}
+                onChange={(e) =>
+                  setStoreFormData({ ...storeFormData, storeLicense: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="storeDescription">Store Description</Label>
+              <Textarea
+                id="storeDescription"
+                placeholder="Describe your store, services, and specialties..."
+                rows="4"
+                value={storeFormData.storeDescription}
+                onChange={(e) =>
+                  setStoreFormData({ ...storeFormData, storeDescription: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="pt-2 flex items-center justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStep("choose-role")}
+                className="border-emerald-900/30"
+                disabled={loading}
+              >
+                Back
+              </Button>
+              <Button
+                onClick={onMedicineStoreSubmit}
+                className="bg-emerald-600 hover:bg-emerald-700"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit for Verification"
+                )}
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );

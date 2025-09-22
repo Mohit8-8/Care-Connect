@@ -1,7 +1,7 @@
 import { verifyAdmin } from "@/actions/admin";
 import { redirect } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldCheck, AlertCircle, Users, CreditCard } from "lucide-react";
+import { ShieldCheck, AlertCircle, Users, CreditCard, Store } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 
 export const metadata = {
@@ -41,6 +41,13 @@ export default async function AdminLayout({ children }) {
           >
             <Users className="h-4 w-4 mr-2 hidden md:inline" />
             <span>Doctors</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="medicine-stores"
+            className="flex-1 md:flex md:items-center md:justify-start md:px-4 md:py-3 w-full"
+          >
+            <Store className="h-4 w-4 mr-2 hidden md:inline" />
+            <span>Medicine Stores</span>
           </TabsTrigger>
           <TabsTrigger
             value="payouts"

@@ -75,7 +75,7 @@ export async function setUserRole(formData) {
 
   const role = formData.get("role");
 
-  if (!role || !["PATIENT", "DOCTOR"].includes(role)) {
+  if (!role || !["PATIENT", "DOCTOR", "MEDICINE_STORE"].includes(role)) {
     throw new Error("Invalid role selection");
   }
 
@@ -123,6 +123,38 @@ export async function setUserRole(formData) {
 
       revalidatePath("/");
       return { success: true, redirect: "/doctor/verification" };
+    }
+
+    // For medicine store role - need store information
+    if (role === "MEDICINE_STORE") {
+      const storeName = formData.get("storeName");
+      const storeAddress = formData.get("storeAddress");
+      const storePhone = formData.get("storePhone");
+      const storeLicense = formData.get("storeLicense");
+      const storeDescription = formData.get("storeDescription");
+
+      // Validate inputs
+      if (!storeName || !storeAddress || !storePhone || !storeLicense || !storeDescription) {
+        throw new Error("All fields are required");
+      }
+
+      await db.user.update({
+        where: {
+          clerkUserId: userId,
+        },
+        data: {
+          role: "MEDICINE_STORE",
+          storeName,
+          storeAddress,
+          storePhone,
+          storeLicense,
+          storeDescription,
+          storeVerificationStatus: "PENDING",
+        },
+      });
+
+      revalidatePath("/");
+      return { success: true, redirect: "/medicine-store/verification" };
     }
   } catch (error) {
     console.error("Failed to set user role:", error);

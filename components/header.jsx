@@ -6,6 +6,8 @@ import {
   ShieldCheck,
   Stethoscope,
   User,
+  Store,
+  ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
@@ -13,6 +15,7 @@ import { checkUser } from "@/lib/checkUser";
 import { Badge } from "./ui/badge";
 import { checkAndAllocateCredits } from "@/actions/credits";
 import Image from "next/image";
+import CartIcon from "./CartIcon";
 
 export default async function Header() {
   const user = await checkUser();
@@ -70,18 +73,44 @@ export default async function Header() {
 
             {/* Patient Links */}
             {user?.role === "PATIENT" && (
-              <Link href="/appointments">
-                <Button
-                  variant="outline"
-                  className="hidden md:inline-flex items-center gap-2"
-                >
-                  <Calendar className="h-4 w-4" />
-                  My Appointments
-                </Button>
-                <Button variant="ghost" className="md:hidden w-10 h-10 p-0">
-                  <Calendar className="h-4 w-4" />
-                </Button>
-              </Link>
+              <>
+                <Link href="/appointments">
+                  <Button
+                    variant="outline"
+                    className="hidden md:inline-flex items-center gap-2"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    My Appointments
+                  </Button>
+                  <Button variant="ghost" className="md:hidden w-10 h-10 p-0">
+                    <Calendar className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/medicine-stores">
+                  <Button
+                    variant="outline"
+                    className="hidden md:inline-flex items-center gap-2"
+                  >
+                    <Store className="h-4 w-4" />
+                    Medicine Store
+                  </Button>
+                  <Button variant="ghost" className="md:hidden w-10 h-10 p-0">
+                    <Store className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/cart">
+                  <Button
+                    variant="outline"
+                    className="hidden md:inline-flex items-center gap-2"
+                  >
+                    <CartIcon />
+                    Cart
+                  </Button>
+                  <Button variant="ghost" className="md:hidden w-10 h-10 p-0">
+                    <CartIcon />
+                  </Button>
+                </Link>
+              </>
             )}
 
             {/* Unassigned Role */}

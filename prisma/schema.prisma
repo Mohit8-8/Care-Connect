@@ -29,6 +29,14 @@ model User {
   credentialUrl     String?   // Document URL
   description       String?   @db.Text
   verificationStatus VerificationStatus?  @default(PENDING)
+
+  // Medicine Store-specific fields
+  storeName         String?
+  storeAddress      String?   @db.Text
+  storePhone        String?
+  storeLicense      String?   // Store license number
+  storeDescription  String?   @db.Text
+  storeVerificationStatus VerificationStatus?  @default(PENDING)
   
   // Relations
   patientAppointments Appointment[] @relation("PatientAppointments")
@@ -36,6 +44,11 @@ model User {
   availabilities      Availability[]
   transactions        CreditTransaction[]
   payouts             Payout[]
+
+  // Medicine Store Relations
+  storeInventory      MedicineStoreInventory[]
+  storeOrders         MedicineOrder[] @relation("StoreOrders")
+  patientOrders       MedicineOrder[] @relation("PatientOrders")
 }
 
 enum UserRole {
@@ -43,6 +56,7 @@ enum UserRole {
   PATIENT
   DOCTOR
   ADMIN
+  MEDICINE_STORE
 }
 
 enum VerificationStatus {
@@ -135,4 +149,74 @@ model Payout {
 enum PayoutStatus {
   PROCESSING
   PROCESSED
+}
+
+model Medicine {
+  id          String   @id @default(uuid())
+  name        String
+  genericName String?
+  category    String
+  description String?  @db.Text
+  manufacturer String?
+  dosage      String?
+  sideEffects String?  @db.Text
+  precautions String?  @db.Text
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  inventory   MedicineStoreInventory[]
+  orders      MedicineOrder[]
+
+  @@index([category])
+  @@index([name])
+}
+
+model MedicineStoreInventory {
+  id            String  @id @default(uuid())
+  storeId       String
+  store         User    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  medicineId    String
+  medicine      Medicine @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  price         Float   // Price per unit
+  stock         Int     // Available quantity
+  minStockLevel Int?    // Minimum stock level for alerts
+  isActive      Boolean @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([storeId, medicineId])
+  @@index([storeId])
+  @@index([medicineId])
+}
+
+model MedicineOrder {
+  id          String   @id @default(uuid())
+  patientId   String
+  patient     User     @relation("PatientOrders", fields: [patientId], references: [id])
+  storeId     String
+  store       User     @relation("StoreOrders", fields: [storeId], references: [id])
+  medicineId  String
+  medicine    Medicine @relation(fields: [medicineId], references: [id])
+  quantity    Int
+  unitPrice   Float
+  totalAmount Float
+  status      MedicineOrderStatus @default(PENDING)
+  orderDate   DateTime @default(now())
+  deliveryDate DateTime?
+  notes       String?  @db.Text
+
+  @@index([patientId, status])
+  @@index([storeId, status])
+  @@index([status, orderDate])
+}
+
+enum MedicineOrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY_FOR_PICKUP
+  DELIVERED
+  CANCELLED
 }

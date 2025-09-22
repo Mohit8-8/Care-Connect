@@ -3,7 +3,27 @@ import { useState, useEffect, useRef } from 'react';
 const ChatBox = () => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
+  const [sessionId] = useState(() => Date.now().toString()); // Generate unique session ID
   const messagesEndRef = useRef(null);
+
+  // Load conversation from session storage on component mount
+  useEffect(() => {
+    const savedConversation = sessionStorage.getItem(`chat_${sessionId}`);
+    if (savedConversation) {
+      try {
+        setMessages(JSON.parse(savedConversation));
+      } catch (error) {
+        console.error('Error loading saved conversation:', error);
+      }
+    }
+  }, [sessionId]);
+
+  // Save conversation to session storage whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      sessionStorage.setItem(`chat_${sessionId}`, JSON.stringify(messages));
+    }
+  }, [messages, sessionId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -16,37 +36,51 @@ const ChatBox = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage = { sender: 'user', text: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const userMessage = { sender: 'user', text: input, timestamp: new Date().toISOString() };
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput('');
 
     try {
+      // Prepare conversation history for API (limit to last 20 messages to avoid token limits)
+      const conversationHistory = newMessages.slice(-20).map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'assistant',
+        content: msg.text
+      }));
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({
+          message: input,
+          conversationHistory,
+          sessionId
+        }),
       });
 
       const data = await response.json();
 
       if (data.response) {
-        const aiMessage = { sender: 'ai', text: data.response };
+        const aiMessage = { sender: 'ai', text: data.response, timestamp: new Date().toISOString() };
         setMessages((prev) => [...prev, aiMessage]);
       } else {
-        const errorMessage = { sender: 'ai', text: 'Error: No response from AI' };
+        const errorMessage = { sender: 'ai', text: 'Error: No response from AI', timestamp: new Date().toISOString() };
         setMessages((prev) => [...prev, errorMessage]);
       }
     } catch (error) {
-      const errorMessage = { sender: 'ai', text: 'Error: Failed to fetch AI response' };
+      const errorMessage = { sender: 'ai', text: 'Error: Failed to fetch AI response', timestamp: new Date().toISOString() };
       setMessages((prev) => [...prev, errorMessage]);
     }
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      sendMessage();
+      e.preventDefault();
+      if (input.trim()) {
+        sendMessage();
+      }
     }
   };
 
