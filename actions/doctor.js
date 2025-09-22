@@ -147,7 +147,7 @@ export async function getDoctorAppointments() {
       where: {
         doctorId: doctor.id,
         status: {
-          in: ["SCHEDULED"],
+          in: ["SCHEDULED", "COMPLETED"],
         },
       },
       include: {
@@ -383,19 +383,16 @@ export async function markAppointmentCompleted(formData) {
       throw new Error("Appointment not found or not authorized");
     }
 
-    // Check if appointment is currently scheduled
+    // Check if appointment is currently scheduled or if end time has passed
     if (appointment.status !== "SCHEDULED") {
       throw new Error("Only scheduled appointments can be marked as completed");
     }
 
-    // Check if current time is after the appointment end time
+    // Check if appointment end time has passed
     const now = new Date();
     const appointmentEndTime = new Date(appointment.endTime);
-
     if (now < appointmentEndTime) {
-      throw new Error(
-        "Cannot mark appointment as completed before the scheduled end time"
-      );
+      throw new Error("Cannot mark appointment as completed before it ends");
     }
 
     // Update the appointment status to COMPLETED

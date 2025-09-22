@@ -1,6 +1,7 @@
 import { getPatientAppointments } from "@/actions/patient";
 import { AppointmentCard } from "@/components/appointment-card";
 import { PageHeader } from "@/components/page-header";
+import MyReports from "@/components/MyReports";
 import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { redirect } from "next/navigation";
@@ -60,6 +61,11 @@ export default async function PatientAppointmentsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* My Reports Section */}
+      <div className="mt-8">
+        <MyReports />
+      </div>
     </div>
   );
 }

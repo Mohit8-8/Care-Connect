@@ -1,6 +1,30 @@
 import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import LoadingSkeleton from './LoadingSkeleton';
-import LanguageSelector from './LanguageSelector';
+// Simple language selector component
+const SimpleLanguageSelector = ({ currentLanguage, onLanguageChange, disabled }) => {
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'हिंदी' },
+    { code: 'bn', name: 'বাংলা' },
+    { code: 'pa', name: 'ਪੰਜਾਬੀ' },
+    { code: 'te', name: 'తెలుగు' }
+  ];
+
+  return (
+    <select
+      value={currentLanguage}
+      onChange={(e) => onLanguageChange(e.target.value)}
+      disabled={disabled}
+      className="bg-white/20 text-white text-sm px-2 py-1 rounded border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+    >
+      {languages.map((lang) => (
+        <option key={lang.code} value={lang.code} className="bg-gray-800 text-white">
+          {lang.name}
+        </option>
+      ))}
+    </select>
+  );
+};
 import { detectLanguage, translateText, getLanguageName } from '../lib/translationService';
 
 // Debounce hook for input optimization
@@ -259,7 +283,7 @@ const ChatBox = () => {
       <div className="flex justify-between items-center p-4 border-b border-white/20">
         <div className="flex items-center space-x-2">
           <span className="text-white text-sm font-medium">Language:</span>
-          <LanguageSelector
+          <SimpleLanguageSelector
             currentLanguage={currentLanguage}
             onLanguageChange={setCurrentLanguage}
             disabled={isLoading}

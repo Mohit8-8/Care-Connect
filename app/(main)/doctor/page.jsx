@@ -3,10 +3,11 @@ import { getDoctorAppointments, getDoctorAvailability } from "@/actions/doctor";
 import { AvailabilitySettings } from "./_components/availability-settings";
 import { getCurrentUser } from "@/actions/onboarding";
 import { redirect } from "next/navigation";
-import { Calendar, Clock, DollarSign } from "lucide-react";
+import { Calendar, Clock, DollarSign, Upload } from "lucide-react";
 import DoctorAppointmentsList from "./_components/appointments-list";
 import { getDoctorEarnings, getDoctorPayouts } from "@/actions/payout";
 import { DoctorEarnings } from "./_components/doctor-earnings";
+import { DoctorReports } from "./_components/doctor-reports";
 
 export default async function DoctorDashboardPage() {
   const user = await getCurrentUser();
@@ -34,24 +35,31 @@ export default async function DoctorDashboardPage() {
       defaultValue="earnings"
       className="grid grid-cols-1 md:grid-cols-4 gap-6"
     >
-      <TabsList className="md:col-span-1 bg-muted/30 border h-14 md:h-40 flex sm:flex-row md:flex-col w-full p-2 md:p-1 rounded-md md:space-y-2 sm:space-x-2 md:space-x-0">
+      <TabsList className="md:col-span-1 bg-muted/30 border h-14 md:h-40 flex sm:flex-row md:flex-col w-full p-1 rounded-md md:space-y-1 sm:space-x-1 md:space-x-0">
         <TabsTrigger
           value="earnings"
-          className="flex-1 md:flex md:items-center md:justify-start md:px-4 md:py-3 w-full"
+          className="flex-1 md:flex md:items-center md:justify-start md:px-3 md:py-2 w-full"
         >
           <DollarSign className="h-4 w-4 mr-2 hidden md:inline" />
           <span>Earnings</span>
         </TabsTrigger>
         <TabsTrigger
           value="appointments"
-          className="flex-1 md:flex md:items-center md:justify-start md:px-4 md:py-3 w-full"
+          className="flex-1 md:flex md:items-center md:justify-start md:px-3 md:py-2 w-full"
         >
           <Calendar className="h-4 w-4 mr-2 hidden md:inline" />
           <span>Appointments</span>
         </TabsTrigger>
         <TabsTrigger
+          value="reports"
+          className="flex-1 md:flex md:items-center md:justify-start md:px-3 md:py-2 w-full"
+        >
+          <Upload className="h-4 w-4 mr-2 hidden md:inline" />
+          <span>Upload Reports</span>
+        </TabsTrigger>
+        <TabsTrigger
           value="availability"
-          className="flex-1 md:flex md:items-center md:justify-start md:px-4 md:py-3 w-full"
+          className="flex-1 md:flex md:items-center md:justify-start md:px-3 md:py-2 w-full"
         >
           <Clock className="h-4 w-4 mr-2 hidden md:inline" />
           <span>Availability</span>
@@ -62,6 +70,9 @@ export default async function DoctorDashboardPage() {
           <DoctorAppointmentsList
             appointments={appointmentsData.appointments || []}
           />
+        </TabsContent>
+        <TabsContent value="reports" className="border-none p-0">
+          <DoctorReports />
         </TabsContent>
         <TabsContent value="availability" className="border-none p-0">
           <AvailabilitySettings slots={availabilityData.slots || []} />

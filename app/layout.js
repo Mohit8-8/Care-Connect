@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import FloatingChatButton from "@/components/FloatingChatButtonImproved";
 import { CartProvider } from "@/lib/cart-context";
 
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {

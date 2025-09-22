@@ -172,7 +172,7 @@ export default function OnboardingPage() {
             </CardTitle>
             <CardDescription className="mb-4">
               Manage your pharmacy inventory, fulfill orders, and serve patients
-              with their medication needs
+              
             </CardDescription>
             <Button
               className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700"

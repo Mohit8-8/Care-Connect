@@ -15,6 +15,8 @@ import {
   Edit,
   Loader2,
   CheckCircle,
+  FileText,
+  Upload,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,6 +36,7 @@ import { generateVideoToken } from "@/actions/appointments";
 import useFetch from "@/hooks/use-fetch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import UploadReport from "./UploadReport";
 
 export function AppointmentCard({
   appointment,
@@ -41,8 +44,10 @@ export function AppointmentCard({
   refetchAppointments,
 }) {
   const [open, setOpen] = useState(false);
-  const [action, setAction] = useState(null); // 'cancel', 'notes', 'video', or 'complete'
+  const [action, setAction] = useState(null); // 'cancel', 'notes', 'video', 'complete', or 'upload'
   const [notes, setNotes] = useState(appointment.notes || "");
+  const [reports, setReports] = useState([]);
+  const [showUpload, setShowUpload] = useState(false);
   const router = useRouter();
 
   // UseFetch hooks for server actions
@@ -67,6 +72,28 @@ export function AppointmentCard({
     data: completeData,
   } = useFetch(markAppointmentCompleted);
 
+  // Fetch reports for this appointment
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await fetch(`/api/reports?type=${userRole === "DOCTOR" ? "doctor" : "patient"}`);
+        const data = await response.json();
+        if (data.reports) {
+          const appointmentReports = data.reports.filter(
+            report => report.appointmentId === appointment.id
+          );
+          setReports(appointmentReports);
+        }
+      } catch (error) {
+        console.error("Failed to fetch reports:", error);
+      }
+    };
+
+    if (appointment.status === "COMPLETED") {
+      fetchReports();
+    }
+  }, [appointment.id, appointment.status, userRole]);
+
   // Format date and time
   const formatDateTime = (dateString) => {
     try {
@@ -87,12 +114,13 @@ export function AppointmentCard({
 
   // Check if appointment can be marked as completed
   const canMarkCompleted = () => {
-    if (userRole !== "DOCTOR" || appointment.status !== "SCHEDULED") {
+    if (userRole !== "DOCTOR") {
       return false;
     }
+    // Allow doctors to mark appointments as completed if they are scheduled or if end time has passed
     const now = new Date();
     const appointmentEndTime = new Date(appointment.endTime);
-    return now >= appointmentEndTime;
+    return appointment.status === "SCHEDULED" || now > appointmentEndTime;
   };
 
   // Handle cancel appointment
@@ -113,17 +141,6 @@ export function AppointmentCard({
   // Handle mark as completed
   const handleMarkCompleted = async () => {
     if (completeLoading) return;
-
-    // Check if appointment end time has passed
-    const now = new Date();
-    const appointmentEndTime = new Date(appointment.endTime);
-
-    if (now < appointmentEndTime) {
-      alert(
-        "Cannot mark appointment as completed before the scheduled end time."
-      );
-      return;
-    }
 
     if (
       window.confirm(
@@ -171,16 +188,18 @@ export function AppointmentCard({
   }, [cancelData, refetchAppointments, router]);
 
   useEffect(() => {
-    if (completeData?.success) {
-      toast.success("Appointment marked as completed");
-      setOpen(false);
+    if (completeData?.success && userRole === "DOCTOR") {
+      toast.success("Appointment marked as completed! You can now upload reports.");
+      setShowUpload(true);
+      setAction("upload");
+      // Refresh reports list
       if (refetchAppointments) {
         refetchAppointments();
       } else {
         router.refresh();
       }
     }
-  }, [completeData, refetchAppointments, router]);
+  }, [completeData, userRole, refetchAppointments, router]);
 
   useEffect(() => {
     if (notesData?.success) {
@@ -265,20 +284,32 @@ export function AppointmentCard({
               </div>
             </div>
             <div className="flex flex-col gap-2 self-end md:self-start">
-              <Badge
-                variant="outline"
-                className={
-                  appointment.status === "COMPLETED"
-                    ? "bg-emerald-900/20 border-emerald-900/30 text-emerald-400"
-                    : appointment.status === "CANCELLED"
-                    ? "bg-red-900/20 border-red-900/30 text-red-400"
-                    : "bg-amber-900/20 border-amber-900/30 text-amber-400"
-                }
-              >
-                {appointment.status}
-              </Badge>
+              <div className="flex gap-2">
+                <Badge
+                  variant="outline"
+                  className={
+                    appointment.status === "COMPLETED"
+                      ? "bg-emerald-900/20 border-emerald-900/30 text-emerald-400"
+                      : appointment.status === "CANCELLED"
+                      ? "bg-red-900/20 border-red-900/30 text-red-400"
+                      : "bg-amber-900/20 border-amber-900/30 text-amber-400"
+                  }
+                >
+                  {appointment.status}
+                </Badge>
+                {appointment.status === "COMPLETED" && reports.length > 0 && userRole === "DOCTOR" && (
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-900/20 border-blue-900/30 text-blue-400 flex items-center gap-1"
+                  >
+                    <FileText className="h-3 w-3" />
+                    {reports.length} Report{reports.length > 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </div>
               <div className="flex gap-2 mt-2 flex-wrap">
-                {canMarkCompleted() && (
+                {userRole === "DOCTOR" && (appointment.status === "SCHEDULED" ||
+                  (appointment.status !== "COMPLETED" && new Date() > new Date(appointment.endTime))) && (
                   <Button
                     size="sm"
                     onClick={handleMarkCompleted}
@@ -303,6 +334,17 @@ export function AppointmentCard({
                 >
                   View Details
                 </Button>
+                {userRole === "DOCTOR" && (appointment.status === "COMPLETED" ||
+                  (appointment.status !== "COMPLETED" && new Date() > new Date(appointment.endTime))) && (
+                  <Button
+                    size="sm"
+                    onClick={() => setShowUpload(true)}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  >
+                    <Upload className="h-4 w-4 mr-1" />
+                    Upload Report
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -380,19 +422,58 @@ export function AppointmentCard({
               <h4 className="text-sm font-medium text-muted-foreground">
                 Status
               </h4>
-              <Badge
-                variant="outline"
-                className={
-                  appointment.status === "COMPLETED"
-                    ? "bg-emerald-900/20 border-emerald-900/30 text-emerald-400"
-                    : appointment.status === "CANCELLED"
-                    ? "bg-red-900/20 border-red-900/30 text-red-400"
-                    : "bg-amber-900/20 border-amber-900/30 text-amber-400"
-                }
-              >
-                {appointment.status}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={
+                    appointment.status === "COMPLETED"
+                      ? "bg-emerald-900/20 border-emerald-900/30 text-emerald-400"
+                      : appointment.status === "CANCELLED"
+                      ? "bg-red-900/20 border-red-900/30 text-red-400"
+                      : "bg-amber-900/20 border-amber-900/30 text-amber-400"
+                  }
+                >
+                  {appointment.status}
+                </Badge>
+                {appointment.status === "COMPLETED" && (
+                  <CheckCircle className="h-4 w-4 text-emerald-400" />
+                )}
+              </div>
             </div>
+
+            {/* Mark Complete Section - Show only for doctors */}
+            {userRole === "DOCTOR" && (appointment.status === "SCHEDULED" ||
+              (appointment.status !== "COMPLETED" && new Date() > new Date(appointment.endTime))) && (
+              <div className="space-y-2 p-4 rounded-lg bg-emerald-900/10 border border-emerald-900/20">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-emerald-400" />
+                  <h4 className="text-sm font-medium text-emerald-400">
+                    Complete Appointment
+                  </h4>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Mark this appointment as completed to enable report uploads and update the status.
+                </p>
+                <Button
+                  onClick={handleMarkCompleted}
+                  disabled={completeLoading}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700"
+                  size="lg"
+                >
+                  {completeLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Completing Appointment...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Mark Appointment as Completed
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
 
             {/* Patient Description */}
             {appointment.patientDescription && (
@@ -437,6 +518,79 @@ export function AppointmentCard({
                     </>
                   )}
                 </Button>
+              </div>
+            )}
+
+            {/* Upload Reports Section - Show only for doctors after completion or when appointment has ended */}
+            {userRole === "DOCTOR" && (appointment.status === "COMPLETED" ||
+              (userRole === "DOCTOR" && new Date() > new Date(appointment.endTime))) && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    Medical Reports
+                  </h4>
+                  <Button
+                    onClick={() => setShowUpload(true)}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    size="sm"
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Report to Cloudinary
+                  </Button>
+                </div>
+                {reports.length > 0 ? (
+                  <div className="p-3 rounded-md bg-muted/20 border border-emerald-900/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="h-4 w-4 text-emerald-400" />
+                      <span className="text-white font-medium">
+                        {reports.length} Report{reports.length > 1 ? 's' : ''} Available
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {reports.map((report) => (
+                        <div key={report.id} className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">{report.title}</span>
+                          <span className="text-xs text-emerald-400">
+                            {format(new Date(report.createdAt), "MMM d, yyyy")}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 rounded-md bg-muted/20 border border-emerald-900/20">
+                    <p className="text-muted-foreground text-sm">
+                      No reports uploaded yet. Click "Upload Report" to add medical reports for this appointment.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Show reports for patients (read-only) */}
+            {userRole === "PATIENT" && appointment.status === "COMPLETED" && reports.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Medical Reports
+                </h4>
+                <div className="p-3 rounded-md bg-muted/20 border border-emerald-900/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText className="h-4 w-4 text-emerald-400" />
+                    <span className="text-white font-medium">
+                      {reports.length} Report{reports.length > 1 ? 's' : ''} Available
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {reports.map((report) => (
+                      <div key={report.id} className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">{report.title}</span>
+                        <span className="text-xs text-emerald-400">
+                          {format(new Date(report.createdAt), "MMM d, yyyy")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -518,8 +672,31 @@ export function AppointmentCard({
 
           <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-between sm:space-x-2">
             <div className="flex gap-2">
-              {/* Mark as Complete Button - Only for doctors */}
-              {canMarkCompleted() && (
+              {/* Cancel Button - For scheduled appointments */}
+              {appointment.status === "SCHEDULED" && (
+                <Button
+                  variant="outline"
+                  onClick={handleCancelAppointment}
+                  disabled={cancelLoading}
+                  className="border-red-900/30 text-red-400 hover:bg-red-900/10"
+                >
+                  {cancelLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Cancelling...
+                    </>
+                  ) : (
+                    <>
+                      <X className="h-4 w-4 mr-1" />
+                      Cancel Appointment
+                    </>
+                  )}
+                </Button>
+              )}
+
+              {/* Mark as Complete Button - Show only for doctors */}
+              {userRole === "DOCTOR" && (appointment.status === "SCHEDULED" ||
+                (appointment.status !== "COMPLETED" && new Date() > new Date(appointment.endTime))) && (
                 <Button
                   onClick={handleMarkCompleted}
                   disabled={completeLoading}
@@ -539,25 +716,15 @@ export function AppointmentCard({
                 </Button>
               )}
 
-              {/* Cancel Button - For scheduled appointments */}
-              {appointment.status === "SCHEDULED" && (
+              {/* Upload Report Button - Show only for doctors */}
+              {userRole === "DOCTOR" && (appointment.status === "COMPLETED" ||
+                (appointment.status !== "COMPLETED" && new Date() > new Date(appointment.endTime))) && (
                 <Button
-                  variant="outline"
-                  onClick={handleCancelAppointment}
-                  disabled={cancelLoading}
-                  className="border-red-900/30 text-red-400 hover:bg-red-900/10 mt-3 sm:mt-0"
+                  onClick={() => setShowUpload(true)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
                 >
-                  {cancelLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Cancelling...
-                    </>
-                  ) : (
-                    <>
-                      <X className="h-4 w-4 mr-1" />
-                      Cancel Appointment
-                    </>
-                  )}
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Report
                 </Button>
               )}
             </div>
@@ -571,6 +738,43 @@ export function AppointmentCard({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Upload Report Dialog */}
+      {showUpload && (
+        <UploadReport
+          appointmentId={appointment.id}
+          patientName={otherParty.name}
+          onClose={() => {
+            setShowUpload(false);
+            setAction(null);
+          }}
+          onSuccess={() => {
+            setShowUpload(false);
+            setAction(null);
+            // Refresh reports
+            const fetchReports = async () => {
+              try {
+                const response = await fetch(`/api/reports?type=doctor`);
+                const data = await response.json();
+                if (data.reports) {
+                  const appointmentReports = data.reports.filter(
+                    report => report.appointmentId === appointment.id
+                  );
+                  setReports(appointmentReports);
+                }
+              } catch (error) {
+                console.error("Failed to fetch reports:", error);
+              }
+            };
+            fetchReports();
+            if (refetchAppointments) {
+              refetchAppointments();
+            } else {
+              router.refresh();
+            }
+          }}
+        />
+      )}
     </>
   );
 }

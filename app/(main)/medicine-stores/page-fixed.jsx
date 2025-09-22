@@ -1,13 +1,13 @@
 import { getVerifiedMedicineStores } from "@/actions/patient";
 import { PageHeader } from "@/components/page-header";
-import { Store, MapPin, Phone, ShoppingCart, ExternalLink, Clock, CheckCircle, Search } from "lucide-react";
+import { Store, MapPin, Phone, ShoppingCart, ExternalLink, Clock, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/actions/onboarding";
+import MedicineStoresSearch from "@/components/medicine-stores-search";
 
 export default async function MedicineStoresPage() {
   const user = await getCurrentUser();
@@ -28,31 +28,7 @@ export default async function MedicineStoresPage() {
       />
 
       {/* Universal Search Bar */}
-      <Card className="mb-6 border-blue-200 bg-blue-50/50">
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search medicines across all stores..."
-                  className="pl-10 text-lg py-3"
-                  id="universal-search-input"
-                />
-              </div>
-            </div>
-            <Link href="/medicines">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Search className="h-4 w-4 mr-2" />
-                Browse All Medicines
-              </Button>
-            </Link>
-          </div>
-          <p className="text-sm text-gray-600 mt-2">
-            Use the search bar above to find medicines across all verified stores
-          </p>
-        </CardContent>
-      </Card>
+      <MedicineStoresSearch />
 
       {/* Quick Stats */}
       <div className="mb-6">

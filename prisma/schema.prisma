@@ -49,6 +49,10 @@ model User {
   storeInventory      MedicineStoreInventory[]
   storeOrders         MedicineOrder[] @relation("StoreOrders")
   patientOrders       MedicineOrder[] @relation("PatientOrders")
+
+  // Report Relations
+  doctorReports       Report[] @relation("ReportDoctor")
+  patientReports      Report[] @relation("ReportPatient")
 }
 
 enum UserRole {
@@ -93,11 +97,14 @@ model Appointment {
   status            AppointmentStatus @default(SCHEDULED)
   notes             String?  @db.Text
   patientDescription String? @db.Text
-    
+
   // Video session fields
   videoSessionId    String?  // Vonage Video API Session ID
   videoSessionToken String?  // Optional: Can store tokens if needed
-  
+
+  // Relations
+  reports           Report[]
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -219,4 +226,33 @@ enum MedicineOrderStatus {
   READY_FOR_PICKUP
   DELIVERED
   CANCELLED
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  doctorId    String
+  doctor      User     @relation("ReportDoctor", fields: [doctorId], references: [id])
+  patientId   String
+  patient     User     @relation("ReportPatient", fields: [patientId], references: [id])
+  title       String
+  description String?  @db.Text
+  fileUrl     String   // Cloudinary URL for the report file
+  fileType    String   // PDF, DOC, DOCX, etc.
+  fileSize    Int      // File size in bytes
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([appointmentId])
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([status])
+}
+
+enum ReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
