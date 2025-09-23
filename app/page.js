@@ -26,10 +26,9 @@ export default function Home() {
                 <span className="gradient-title">rural Punjab</span>
               </h1>
               <p className="text-muted-foreground text-lg md:text-xl max-w-md">
-                Consult doctors
-                online, access digital health records, and check local medicine
-                availability. No more long journeys or missed work CareConnect
-                puts essential care in your hands.
+                Consult doctors online, access digital health records, and check
+                local medicine availability. No more long journeys or missed
+                work CareConnect puts essential care in your hands.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
@@ -54,7 +53,7 @@ export default function Home() {
 
             <div className="relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden">
               <Image
-                src="/banner2.png"
+                src="/doctors.png"
                 alt="Doctor consultation"
                 fill
                 priority
